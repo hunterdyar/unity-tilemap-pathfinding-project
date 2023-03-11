@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9141376958be4026b21b7061a5b50889, type: 3}
-  m_Name: New Nav Tile
+  m_Name: NonWalkableNavTile
   m_EditorClassIdentifier: 
   m_Sprite: {fileID: 7482667652216324306, guid: c07831af24f5d2f409df73ba181fcf81, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_Transform:
     e00: 1
     e01: 0
@@ -35,6 +35,6 @@ MonoBehaviour:
   m_Flags: 0
   m_ColliderType: 1
   walkCost: 0
-  Walkable: 1
+  Walkable: 0
   Location: {x: 3, y: 3, z: 0}
   TilemapNavigation: {fileID: 0}
