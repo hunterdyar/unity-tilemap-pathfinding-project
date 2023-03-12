@@ -9,7 +9,7 @@ namespace Nav_Tiles.Scripts
 		public TilemapNavigation TilemapNavigation => navigation;
 		private TilemapNavigation navigation;
 
-		public int Cost => tile.WalkCost;
+		public int WalkCost => tile.WalkCost;
 		public bool Walkable => tile.Walkable;
 		//todo: private setter
 		public Vector3Int location;

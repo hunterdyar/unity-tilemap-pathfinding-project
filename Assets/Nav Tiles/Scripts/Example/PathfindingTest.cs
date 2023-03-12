@@ -44,7 +44,7 @@ namespace Nav_Tiles.Scripts.Example
 				endNode = _navigation.GetNavNode(hover);
 				
 				//if we have start and end nodes.
-				if (startNode != null && endNode != null)
+				if (startNode is { Walkable: true } && endNode is { Walkable: true })
 				{
 					//this is for me in a month when I forget again
 					if (startNode.NavTile.flags == TileFlags.LockColor)

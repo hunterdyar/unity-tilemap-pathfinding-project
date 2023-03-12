@@ -55,7 +55,7 @@ public class TilemapNavigation : MonoBehaviour
 
 	private void Awake()
 	{
-		_pathfinder = new DJPathfinder(this);
+		_pathfinder = new BreadthFirstPathfinding(this);
 		_tilemap = GetComponent<Tilemap>();
 		InitiateNavMap();
 	}
@@ -77,18 +77,18 @@ public class TilemapNavigation : MonoBehaviour
 		} 
 	}
 
-	public NavNode[] GetNeighborNodes(NavNode node)
+	public NavNode[] GetNeighborNodes(NavNode node,bool walkableOnly = true)
 	{
 		switch (_connectionType)
 		{
 			case GridConnectionType.FlatCardinalAndDiagonal:
-				return GetNeighborNodesUsingDirectionList(node, CardinalAndDiagonalDirections);
+				return GetNeighborNodesUsingDirectionList(node, CardinalAndDiagonalDirections,walkableOnly);
 			case GridConnectionType.FlatCardinal:
 			default:
-				return GetNeighborNodesUsingDirectionList(node, CardinalDirections);
+				return GetNeighborNodesUsingDirectionList(node, CardinalDirections,walkableOnly);
 		}
 	}
-	private NavNode[] GetNeighborNodesUsingDirectionList(NavNode node, Vector3Int[] directions)
+	private NavNode[] GetNeighborNodesUsingDirectionList(NavNode node, Vector3Int[] directions, bool walkableOnly = true)
 	{
 		NavNode[] nodeCache = new NavNode[12];
 		int n = 0;
@@ -96,8 +96,11 @@ public class TilemapNavigation : MonoBehaviour
 		{
 			if(_navMap.TryGetValue(node.location+dir,out var neighbor))
 			{
-				nodeCache[n] = neighbor;
-				n++;
+				if (!walkableOnly || node.Walkable)
+				{
+					nodeCache[n] = neighbor;
+					n++;
+				}
 			}
 		}
 
