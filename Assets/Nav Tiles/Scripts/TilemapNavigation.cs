@@ -1,9 +1,7 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using Nav_Tiles.Scripts;
-using Nav_Tiles.Scripts.Pathfinding;
-using Unity.VisualScripting;
+using NavigationTiles.Pathfinding;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.Tilemaps;
@@ -17,143 +15,160 @@ using UnityEngine.Tilemaps;
 //the downside is updates at runtime. This system doesn't support fully adding/removing tiles during play yet (use walkable flag for now), but my goal is to be able to.
 //Perhaps more importantly, one can optimize a grid to remove redundant nodes, only leaving nodes where a user may turn (or stop). By having navnodes and navTiles be independent, that's a possibility.
 
-
-[RequireComponent(typeof(Tilemap))]
-public class TilemapNavigation : MonoBehaviour
+namespace NavigationTiles
 {
-	private NavTile[] GetNeighborCache = new NavTile[8];//"8" here needs to be the highest possible number of neighbors.
-	public readonly Vector3Int[] CardinalDirections = new[]
-	{
-		new Vector3Int(1, 0, 0),
-		new Vector3Int(0, 1, 0),
-		new Vector3Int(-1,0,0),
-		new Vector3Int(0,-1,0),
-	};
-	public readonly Vector3Int[] CardinalAndDiagonalDirections = new[]
-	{
-		new Vector3Int(1, 0, 0),
-		new Vector3Int(0, 1, 0),
-		new Vector3Int(-1, 0, 0),
-		new Vector3Int(0, -1, 0),
-		new Vector3Int(1, 1, 0),
-		new Vector3Int(-1, 1, 0),
-		new Vector3Int(-1, -1, 0),
-		new Vector3Int(1, -1, 0),
-	};
-	public GridConnectionType ConnectionConnectionType => _connectionType = GridConnectionType.FlatCardinal;//default
-	[FormerlySerializedAs("_type")] [SerializeField] private GridConnectionType _connectionType;
-	public Tilemap Tilemap => _tilemap;
-	private Tilemap _tilemap;
-	
-	//todo: dropdown selection for pathfinder types.
-	public IPathfinder Pathfinder => _pathfinder;
-	private IPathfinder _pathfinder;
-	public Grid Grid => _tilemap.layoutGrid;
-	
-	//Dictionaries cannot be serialized by Unity. 
-	private readonly Dictionary<Vector3Int, NavNode> _navMap = new Dictionary<Vector3Int, NavNode>();
 
-	private void Awake()
-	{
-		_pathfinder = new BreadthFirstPathfinding(this);
-		_tilemap = GetComponent<Tilemap>();
-		InitiateNavMap();
-	}
-	private void InitiateNavMap()
-	{
-		//we don't know if bounds have been reasonably set or not.
-		_tilemap.CompressBounds();
-		
-		var bounds = _tilemap.cellBounds;
-		//I was about to write an extension method to give me allPositionsWithin, until taking the 1/4 second to actually read documentation and go "oh, wait, that already exists"
-		//This will work for all layouts (rectangular, hex, grid, etc)
-		foreach (var location in bounds.allPositionsWithin)
-		{
-			var tile = _tilemap.GetTile<NavTile>(location);
-			if (tile != null)
-			{
-				_navMap.Add(location,new NavNode(tile,location,this));
-			}
-		} 
-	}
 
-	public NavNode[] GetNeighborNodes(NavNode node,bool walkableOnly = true)
+	[RequireComponent(typeof(Tilemap))]
+	public class TilemapNavigation : MonoBehaviour
 	{
-		switch (_connectionType)
+		private NavTile[] GetNeighborCache = new NavTile[8]; //"8" here needs to be the highest possible number of neighbors.
+
+		public readonly Vector3Int[] CardinalDirections = new[]
 		{
-			case GridConnectionType.FlatCardinalAndDiagonal:
-				return GetNeighborNodesUsingDirectionList(node, CardinalAndDiagonalDirections,walkableOnly);
-			case GridConnectionType.FlatCardinal:
-			default:
-				return GetNeighborNodesUsingDirectionList(node, CardinalDirections,walkableOnly);
+			new Vector3Int(1, 0, 0),
+			new Vector3Int(0, 1, 0),
+			new Vector3Int(-1, 0, 0),
+			new Vector3Int(0, -1, 0),
+		};
+
+		public readonly Vector3Int[] CardinalAndDiagonalDirections = new[]
+		{
+			new Vector3Int(1, 0, 0),
+			new Vector3Int(0, 1, 0),
+			new Vector3Int(-1, 0, 0),
+			new Vector3Int(0, -1, 0),
+			new Vector3Int(1, 1, 0),
+			new Vector3Int(-1, 1, 0),
+			new Vector3Int(-1, -1, 0),
+			new Vector3Int(1, -1, 0),
+		};
+
+		public GridConnectionType ConnectionConnectionType => _connectionType = GridConnectionType.FlatCardinal; //default
+
+		[FormerlySerializedAs("_type")] [SerializeField]
+		private GridConnectionType _connectionType;
+
+		public Tilemap Tilemap => _tilemap;
+		private Tilemap _tilemap;
+		public Pathfinder Pathfinder => _pathfinder;
+		private Pathfinder _pathfinder;
+		public Grid Grid => _tilemap.layoutGrid;
+		public int MaxNodeCount => _navMap.Count + 1; //used by the pathfinder.
+
+		//Dictionaries cannot be serialized by Unity. 
+		private readonly Dictionary<Vector3Int, NavNode> _navMap = new Dictionary<Vector3Int, NavNode>();
+
+		private void Awake()
+		{
+			_tilemap = GetComponent<Tilemap>();
+			InitiateNavMap();
+			
+			//We can select different pathfinders.
+			_pathfinder = new AStarPathfinder(this);
 		}
-	}
-	private NavNode[] GetNeighborNodesUsingDirectionList(NavNode node, Vector3Int[] directions, bool walkableOnly = true)
-	{
-		NavNode[] nodeCache = new NavNode[12];
-		int n = 0;
-		foreach (var dir in directions)
+
+		private void InitiateNavMap()
 		{
-			if(_navMap.TryGetValue(node.location+dir,out var neighbor))
+			//we don't know if bounds have been reasonably set or not.
+			_tilemap.CompressBounds();
+
+			var bounds = _tilemap.cellBounds;
+			//I was about to write an extension method to give me allPositionsWithin, until taking the 1/4 second to actually read documentation and go "oh, wait, that already exists"
+			//This will work for all layouts (rectangular, hex, grid, etc)
+			foreach (var location in bounds.allPositionsWithin)
 			{
-				if (!walkableOnly || node.Walkable)
+				var tile = _tilemap.GetTile<NavTile>(location);
+				if (tile != null)
 				{
-					nodeCache[n] = neighbor;
-					n++;
+					_navMap.Add(location, new NavNode(tile, location, this));
 				}
 			}
 		}
 
-		if (n == 0)
+		public NavNode[] GetNeighborNodes(NavNode node, bool walkableOnly = true)
 		{
-			return Array.Empty<NavNode>();
+			switch (_connectionType)
+			{
+				case GridConnectionType.FlatCardinalAndDiagonal:
+					return GetNeighborNodesUsingDirectionList(node, CardinalAndDiagonalDirections, walkableOnly);
+				case GridConnectionType.FlatCardinal:
+				default:
+					return GetNeighborNodesUsingDirectionList(node, CardinalDirections, walkableOnly);
+			}
 		}
 
-		var output = new NavNode[n];
-		Array.Copy(nodeCache, output, n);
-		return output;
-	}
-	private void OnValidate()
-	{
-		_tilemap = GetComponent<Tilemap>();
-		if (Grid.cellLayout == GridLayout.CellLayout.Hexagon && _connectionType != GridConnectionType.FlatHexagonal)
+		private NavNode[] GetNeighborNodesUsingDirectionList(NavNode node, Vector3Int[] directions, bool walkableOnly = true)
 		{
-			Debug.LogWarning("Hexagonal connection type is only valid option for grid.");
-			_connectionType = GridConnectionType.FlatHexagonal;
+			NavNode[] nodeCache = new NavNode[12];
+			int n = 0;
+			foreach (var dir in directions)
+			{
+				if (_navMap.TryGetValue(node.location + dir, out var neighbor))
+				{
+					if (!walkableOnly || node.Walkable)
+					{
+						nodeCache[n] = neighbor;
+						n++;
+					}
+				}
+			}
+
+			if (n == 0)
+			{
+				return Array.Empty<NavNode>();
+			}
+
+			var output = new NavNode[n];
+			Array.Copy(nodeCache, output, n);
+			return output;
 		}
 
-		if (Grid.cellLayout == GridLayout.CellLayout.Rectangle && _connectionType == GridConnectionType.FlatHexagonal)
+		private void OnValidate()
 		{
-			Debug.LogWarning("Hexagonal connection type is not valid option for rectangular grid.");
-			_connectionType = GridConnectionType.FlatCardinalAndDiagonal;
+			_tilemap = GetComponent<Tilemap>();
+			if (Grid.cellLayout == GridLayout.CellLayout.Hexagon && _connectionType != GridConnectionType.FlatHexagonal)
+			{
+				Debug.LogWarning("Hexagonal connection type is only valid option for grid.");
+				_connectionType = GridConnectionType.FlatHexagonal;
+			}
+
+			if (Grid.cellLayout == GridLayout.CellLayout.Rectangle && _connectionType == GridConnectionType.FlatHexagonal)
+			{
+				Debug.LogWarning("Hexagonal connection type is not valid option for rectangular grid.");
+				_connectionType = GridConnectionType.FlatCardinalAndDiagonal;
+			}
+
+			if (Grid.cellLayout == GridLayout.CellLayout.Isometric && _connectionType == GridConnectionType.FlatHexagonal)
+			{
+				Debug.LogWarning("Hexagonal connection type is not valid option for isometric grid.");
+				_connectionType = GridConnectionType.FlatCardinal;
+			}
+
+			if (Grid.cellLayout == GridLayout.CellLayout.IsometricZAsY && _connectionType == GridConnectionType.FlatHexagonal)
+			{
+				Debug.LogWarning("Hexagonal connection type is not valid option for isometricZAsY grid.");
+				_connectionType = GridConnectionType.FlatCardinal;
+			}
 		}
 
-		if (Grid.cellLayout == GridLayout.CellLayout.Isometric && _connectionType == GridConnectionType.FlatHexagonal)
+		public NavTile GetNavTile(Vector3Int cellPosition)
 		{
-			Debug.LogWarning("Hexagonal connection type is not valid option for isometric grid.");
-			_connectionType = GridConnectionType.FlatCardinal;
+			return _tilemap.GetTile<NavTile>(cellPosition);
 		}
 
-		if (Grid.cellLayout == GridLayout.CellLayout.IsometricZAsY && _connectionType == GridConnectionType.FlatHexagonal)
+		public bool TryGetNavNode(Vector3Int cellPosition, out NavNode node)
 		{
-			Debug.LogWarning("Hexagonal connection type is not valid option for isometricZAsY grid.");
-			_connectionType = GridConnectionType.FlatCardinal;
+			return _navMap.TryGetValue(cellPosition, out node);
 		}
-	}
-
-	public NavTile GetNavTile(Vector3Int cellPosition)
-	{
-		return _tilemap.GetTile<NavTile>(cellPosition);
-	}
-
-	//todo: make tryget pattern
-	public NavNode GetNavNode(Vector3Int cellPosition)
-	{
-		if (_navMap.TryGetValue(cellPosition, out var node))
+		public NavNode GetNavNode(Vector3Int cellPosition)
 		{
-			return node;
-		}
+			if (_navMap.TryGetValue(cellPosition, out var node))
+			{
+				return node;
+			}
 
-		return null;
+			return null;
+		}
 	}
 }

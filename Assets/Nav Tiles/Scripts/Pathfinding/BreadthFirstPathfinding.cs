@@ -1,20 +1,22 @@
 ﻿using System.Collections.Generic;
 
-namespace Nav_Tiles.Scripts.Pathfinding
+namespace NavigationTiles.Pathfinding
 {
-	public class BreadthFirstPathfinding : IPathfinder
+	/// <summary>
+	/// Because one would only bother using this if they wanted to do something _else_ with the pathfinding (use astar instead), I've given the CameFrom dictionary a getter, and removed the early-exit case.
+	/// </summary>
+	public class BreadthFirstPathfinding : Pathfinder
 	{
-		private TilemapNavigation _tilemap;
-		private Dictionary<NavNode, NavNode> cameFrom;
-		public BreadthFirstPathfinding(TilemapNavigation tilemapNavigation)
+		public Dictionary<NavNode, NavNode> CameFrom => cameFrom;
+		private Queue<NavNode> frontier = new Queue<NavNode>();
+		public BreadthFirstPathfinding(TilemapNavigation tilemapNavigation) : base(tilemapNavigation)
 		{
-			_tilemap = tilemapNavigation;
 		}
-		public List<NavNode> FindPath(NavNode start, NavNode end)
+		public override List<NavNode> FindPath(NavNode start, NavNode end)
 		{
-			 cameFrom = new Dictionary<NavNode, NavNode>();
+			cameFrom.Clear();
+			frontier.Clear();
 			
-			var frontier = new Queue<NavNode>();
 			frontier.Enqueue(start);
 			cameFrom[start] = start;
 			var reached = new HashSet<NavNode>();
@@ -24,7 +26,7 @@ namespace Nav_Tiles.Scripts.Pathfinding
 			{
 				var current = frontier.Dequeue();
 
-				foreach (var next in _tilemap.GetNeighborNodes(current))
+				foreach (var next in tilemap.GetNeighborNodes(current))
 				{
 					if (!reached.Contains(next))
 					{
@@ -37,21 +39,6 @@ namespace Nav_Tiles.Scripts.Pathfinding
 
 			return GetPath(end);
 		}
-
-		public List<NavNode> GetPath(NavNode end)
-		{
-			var path = new List<NavNode>();
-			bool getting = true;
-			var current = end;
-			//we set start=start.
-			while (current != cameFrom[current])
-			{
-				path.Add(current);
-				current = cameFrom[current];
-			}
-
-			path.Reverse();
-			return path;
-		}
+		
 	}
 }

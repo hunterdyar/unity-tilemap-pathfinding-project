@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+﻿using Priority_Queue;
+using UnityEngine;
 
-namespace Nav_Tiles.Scripts
+namespace NavigationTiles
 {
 	public class NavNode
 	{

@@ -1,57 +1,52 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using Nav_Tiles.Scripts.Utility;
-using Unity.Mathematics;
+using Priority_Queue;
 using UnityEngine;
 
-namespace Nav_Tiles.Scripts.Pathfinding
+namespace NavigationTiles.Pathfinding
 {
-	public class AStarPathfinder : IPathfinder
+	public class AStarPathfinder : Pathfinder
 	{
-
-		private Dictionary<NavNode, NavNode> _cameFrom = new Dictionary<NavNode, NavNode>();
-		private Dictionary<NavNode, int> _costSoFar = new Dictionary<NavNode, int>();
-		private Dictionary<NavNode, int> _priorityCosts = new Dictionary<NavNode, int>();
-
-		private TilemapNavigation _navMap;
-		public AStarPathfinder(TilemapNavigation tilemapNavigation)
+		private readonly Dictionary<NavNode, int> costSoFar = new Dictionary<NavNode, int>();
+		private readonly SimplePriorityQueue<NavNode> frontier = new SimplePriorityQueue<NavNode>();
+		public AStarPathfinder(TilemapNavigation tilemapNavigation) : base(tilemapNavigation)
 		{
-			_navMap = tilemapNavigation;
 		}
-		
-		public List<NavNode> FindPath(NavNode start, NavNode end)
+
+		public override List<NavNode> FindPath(NavNode start, NavNode end)
 		{
-			//im not actually sure this will work for the heuristic.
-			var frontier = new PriorityQueue<NavNode,int>();
-			_cameFrom.Clear();
-			_costSoFar.Clear();
-			
-			//Add initial node
-			_costSoFar.Add(start,0);
-			_cameFrom.Add(start,start);
-			frontier.Enqueue(start,0);
-			if (start == end)
-			{
-				return new List<NavNode>(new []{start});
-			}
+			costSoFar.Clear();
+			costSoFar[start] = 0;
+			cameFrom.Clear();
+			cameFrom[start] = start;
+			frontier.Clear();
+
+			frontier.Enqueue(start, 0);
 			
 			while (frontier.Count > 0)
 			{
 				var current = frontier.Dequeue();
+
 				if (current == end)
 				{
 					break;
 				}
 
-				foreach (var next in _navMap.GetNeighborNodes(current))
+				foreach (var next in tilemap.GetNeighborNodes(current))
 				{
-					int newCost = _costSoFar[current] + (next.WalkCost);//just gonna use walkCost.
-					if (!_costSoFar.ContainsKey(next) || newCost < _costSoFar[next])
+					int newCost = costSoFar[current] + next.WalkCost; //cost algorithm generalized somewhere
+
+					if (!costSoFar.ContainsKey(next))
 					{
-						_costSoFar[next] = newCost;
-						int priority = newCost + Heuristic(next, end);
-						frontier.Enqueue(next,priority);
-						_cameFrom[next] = current;
+						costSoFar[next] = newCost;
+						int priority = newCost + Heuristic(end,next);
+						cameFrom[next] = current;
+						frontier.Enqueue(next, priority);
+					}else if (newCost < costSoFar[next])
+					{
+						costSoFar[next] = newCost;
+						int priority = newCost + Heuristic(end, next);
+						cameFrom[next] = current;
+						frontier.UpdatePriority(next, priority);
 					}
 				}
 			}
@@ -59,21 +54,7 @@ namespace Nav_Tiles.Scripts.Pathfinding
 			return GetPath(end);
 		}
 
-		public List<NavNode> GetPath(NavNode end)
-		{
-			var path = new List<NavNode>();
-			bool getting = true;
-			var current = end;
-			//we set start=start.
-			while (current != _cameFrom[current])
-			{
-				path.Add(current);
-				current = _cameFrom[current];
-			}
-
-			path.Reverse();
-			return path;
-		}
+		
 
 		//overload for convenience
 		public static int Heuristic(NavNode a, NavNode b, int stepCost = 1)

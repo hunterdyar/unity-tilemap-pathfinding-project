@@ -1,99 +1,76 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Priority_Queue;
 using UnityEngine;
 
-namespace Nav_Tiles.Scripts.Pathfinding
+namespace NavigationTiles.Pathfinding
 {
-	public class DJPathfinder : IPathfinder
+	//Dijkstra's Algorthim
+	public class DJPathfinder : Pathfinder
 	{
-		public List<NavNode> FindPath(NavNode start, NavNode finish)
-		{
-			Search(start,finish,10000000);//testing
-			return path;
-		}
-		//Dijkstra's-ish algorithm basically does a blind flood-fill from the destination until the start tile is reached
-		//keeping track of which tile flooded into the 'current' allows us to then reverse those directions and get the shortest path from start to end.
+		private Dictionary<NavNode,int> _costSoFar;
 
-		private TilemapNavigation _tilemapNavigation;
-		NavNode _cachedStart;
-		public readonly List<NavNode> path = new List<NavNode>();
-		public Dictionary<NavNode, int> Distances { get; set; } = new Dictionary<NavNode, int>();
-		Dictionary<NavNode, NavNode> _cameFrom = new Dictionary<NavNode, NavNode>();
-		
-		public bool Running { get; private set; }
-
-		public DJPathfinder(TilemapNavigation tilemapNavigation)
+		public DJPathfinder(TilemapNavigation navigation) : base(navigation)
 		{
-			_tilemapNavigation = tilemapNavigation;
 		}
 
-		public void Search(NavNode start, NavNode end, int iterationsPerFrame)
+		public override List<NavNode> FindPath(NavNode start, NavNode end)
 		{
-			_tilemapNavigation.StartCoroutine(FindAllPaths(start,end, iterationsPerFrame));
-		}
+			_costSoFar = new Dictionary<NavNode, int>();
+			_costSoFar[start] = 0;
+			cameFrom.Clear();
+			cameFrom[start] = start;
+			
+			
+			var frontier = new SimplePriorityQueue<NavNode>();
+			frontier.Enqueue(start,0);
 
-		public IEnumerator FindAllPaths(NavNode start, NavNode end, int iterationsPerFrame)
-		{
-			Running = true;
-			var frontier = new Queue<NavNode>();
-			_cachedStart = start;
-			frontier.Enqueue(start);
-			_cameFrom = new Dictionary<NavNode, NavNode>();
-			Distances = new Dictionary<NavNode, int> {[start] = 0};
-			var iterations = 0;
+			var reached = new HashSet<NavNode>();
+			reached.Add(start);
+
 			while (frontier.Count > 0)
 			{
 				var current = frontier.Dequeue();
-				foreach (var next in _tilemapNavigation.GetNeighborNodes(current))
+				
+				if (current == end)
 				{
-					if (Distances.ContainsKey(next) || !next.Walkable)
+					break;
+				}
+
+				foreach (var next in tilemap.GetNeighborNodes(current))
+				{
+					int newCost = _costSoFar[current] + next.WalkCost;//cost algorithm generalized somewhere
+					//reached is only used because our temp priority queue implementation doesn't have "contains" for checking the frontier. We could check costsofar tho. 
+					if (!reached.Contains(next) || newCost < _costSoFar[next])
 					{
-						continue;
+						_costSoFar[next] = newCost;
+						int priority = newCost;
+						frontier.Enqueue(next,priority);
+						reached.Add(next);
+						cameFrom[next] = current;
 					}
-
-					frontier.Enqueue(next);
-					Distances[next] = Distances[current] + 1;
-					_cameFrom[next] = current;
-				}
-
-				//performance things
-				iterations++;
-				// ReSharper disable once InvertIf
-				if (iterations >= iterationsPerFrame)
-				{
-					iterations = 0;
-					yield return null;
 				}
 			}
-			
-			SetPathList(start,end);
+
+			return GetPath(end);
 		}
 
-		private void SetPathList(NavNode start, NavNode end)
+		public List<NavNode> GetPath(NavNode end)
 		{
-			Running = false;
-			var search = end;
-			path.Clear();
-			while (search != start)
+			var path = new List<NavNode>();
+			bool getting = true;
+			var current = end;
+			//we set start=start.
+			while (current != cameFrom[current])
 			{
-				if (_cameFrom.ContainsKey(search))
-				{
-					path.Add(search);
-					search = _cameFrom[search];
-				}
-				else
-				{
-					return;
-				}
+				path.Add(current);
+				current = cameFrom[current];
 			}
 
-			path.Add(start);
 			path.Reverse();
-		}
-
-		public List<NavNode> GetPath()
-		{
 			return path;
 		}
+
+		
 	}
 }
