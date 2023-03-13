@@ -17,7 +17,6 @@ namespace NavigationTiles.Pathfinding
 		public List<NavNode> GetPath(NavNode end)
 		{
 			var path = new List<NavNode>();
-			bool getting = true;
 			var current = end;
 			//we set start=start.
 			while (current != cameFrom[current])

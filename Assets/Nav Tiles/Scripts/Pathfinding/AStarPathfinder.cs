@@ -1,9 +1,15 @@
 ﻿using System.Collections.Generic;
+using Nav_Tiles.Scripts;
+using Nav_Tiles.Scripts.Utility;
 using Priority_Queue;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 namespace NavigationTiles.Pathfinding
 {
+	/// <summary>
+	/// A* pathfinding using (by default) a manhattan distance Heuristic that works on any square (or square-ish) map.
+	/// </summary>
 	public class AStarPathfinder : Pathfinder
 	{
 		private readonly Dictionary<NavNode, int> costSoFar = new Dictionary<NavNode, int>();
@@ -57,15 +63,15 @@ namespace NavigationTiles.Pathfinding
 		
 
 		//overload for convenience
-		public static int Heuristic(NavNode a, NavNode b, int stepCost = 1)
+		public virtual int Heuristic(NavNode a, NavNode b, int stepUpLayerCost = 1)
 		{
-			return Heuristic(a.location, b.location,stepCost);
+			return Heuristic(a.NavPosition, b.NavPosition,stepUpLayerCost);
 		}
 
 		//Manhattan Distance. StepCost is multiplier for going up or down on z.
-		public static int Heuristic(Vector3Int a, Vector3Int b, int stepCost = 1)
+		public virtual int Heuristic(Vector3Int a, Vector3Int b, int stepUpLayerCost = 1)
 		{
-			return Mathf.Abs(a.x - b.x) + Mathf.Abs(a.y - b.y) + stepCost*Mathf.Abs(a.z - b.z);
+			return Mathf.Abs(a.x - b.x) + Mathf.Abs(a.y - b.y) + stepUpLayerCost*Mathf.Abs(a.z - b.z);
 		}
 	}
 }

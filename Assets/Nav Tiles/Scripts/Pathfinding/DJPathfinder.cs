@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace NavigationTiles.Pathfinding
 {
-	//Dijkstra's Algorthim
+	//Dijkstra's Algorithm
 	public class DJPathfinder : Pathfinder
 	{
 		private Dictionary<NavNode,int> _costSoFar;
@@ -54,23 +54,5 @@ namespace NavigationTiles.Pathfinding
 
 			return GetPath(end);
 		}
-
-		public List<NavNode> GetPath(NavNode end)
-		{
-			var path = new List<NavNode>();
-			bool getting = true;
-			var current = end;
-			//we set start=start.
-			while (current != cameFrom[current])
-			{
-				path.Add(current);
-				current = cameFrom[current];
-			}
-
-			path.Reverse();
-			return path;
-		}
-
-		
 	}
 }

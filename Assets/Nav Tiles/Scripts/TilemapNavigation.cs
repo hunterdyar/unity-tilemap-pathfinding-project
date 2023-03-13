@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Nav_Tiles.Scripts;
+using Nav_Tiles.Scripts.Utility;
 using NavigationTiles.Pathfinding;
+using NavigationTiles.Utility;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.Tilemaps;
@@ -22,27 +24,8 @@ namespace NavigationTiles
 	[RequireComponent(typeof(Tilemap))]
 	public class TilemapNavigation : MonoBehaviour
 	{
-		private NavTile[] GetNeighborCache = new NavTile[8]; //"8" here needs to be the highest possible number of neighbors.
-
-		public readonly Vector3Int[] CardinalDirections = new[]
-		{
-			new Vector3Int(1, 0, 0),
-			new Vector3Int(0, 1, 0),
-			new Vector3Int(-1, 0, 0),
-			new Vector3Int(0, -1, 0),
-		};
-
-		public readonly Vector3Int[] CardinalAndDiagonalDirections = new[]
-		{
-			new Vector3Int(1, 0, 0),
-			new Vector3Int(0, 1, 0),
-			new Vector3Int(-1, 0, 0),
-			new Vector3Int(0, -1, 0),
-			new Vector3Int(1, 1, 0),
-			new Vector3Int(-1, 1, 0),
-			new Vector3Int(-1, -1, 0),
-			new Vector3Int(1, -1, 0),
-		};
+		private NavNode[] _getNeighborCache = new NavNode[8]; //"8" here needs to be the highest possible number of neighbors.
+		
 
 		public GridConnectionType ConnectionConnectionType => _connectionType = GridConnectionType.FlatCardinal; //default
 
@@ -65,7 +48,14 @@ namespace NavigationTiles
 			InitiateNavMap();
 			
 			//We can select different pathfinders.
-			_pathfinder = new AStarPathfinder(this);
+			if (_connectionType == GridConnectionType.Hexagonal)
+			{
+				_pathfinder = new AstarHexPathfinder(this);
+			}
+			else
+			{
+				_pathfinder = new AStarPathfinder(this);
+			}
 		}
 
 		private void InitiateNavMap()
@@ -81,34 +71,79 @@ namespace NavigationTiles
 				var tile = _tilemap.GetTile<NavTile>(location);
 				if (tile != null)
 				{
-					_navMap.Add(location, new NavNode(tile, location, this));
+					//we use grid cellposition for rectangular and isometric maps, but for hex, we convert to Cube.
+					//This makes all the math and pathfinding much easier, at the inconvenience of these wrapper functions to do the conversion when needed.
+					var loc = GridCellToNavCell(location);
+					_navMap.Add(loc, new NavNode(tile, loc, this));
 				}
 			}
 		}
 
+		/// <summary>
+		/// This is only necessary when using hex grids.
+		/// </summary>
+		public Vector3Int GridCellToNavCell(Vector3Int location)
+		{
+			if (_tilemap.cellLayout == GridLayout.CellLayout.Hexagon)
+			{
+				if (_tilemap.cellSwizzle == GridLayout.CellSwizzle.XYZ)
+				{
+					//Unity is using Pointy Top, which uses offset odd-row coords. We will use Cube coordinates.
+					return HexUtility.OddRToCube(location);
+				}
+				else if (_tilemap.cellSwizzle == GridLayout.CellSwizzle.YXZ)
+				{
+					//Unity is using Flat Top, which uses offset odd-col coords. Again, we will use cube for both cases.
+					return HexUtility.OddQToCube(location);
+				}
+			}
+
+			return location;
+		}
+
+		public Vector3Int NavCellToGridCell(Vector3Int location)
+		{
+			if (_tilemap.cellLayout == GridLayout.CellLayout.Hexagon)
+			{
+				if (_tilemap.cellSwizzle == GridLayout.CellSwizzle.XYZ)
+				{
+					//Unity is using Pointy Top, which uses offset odd-row coords. We will use Cube coordinates.
+					return HexUtility.CubeToOddR(location);
+				}
+				else if (_tilemap.cellSwizzle == GridLayout.CellSwizzle.YXZ)
+				{
+					//Unity is using Flat Top, which uses offset odd-col coords. Again, we will use cube for both cases.
+					return HexUtility.CubeToOddQ(location);
+				}
+			}
+
+			return location;
+		}
 		public NavNode[] GetNeighborNodes(NavNode node, bool walkableOnly = true)
 		{
 			switch (_connectionType)
 			{
 				case GridConnectionType.FlatCardinalAndDiagonal:
-					return GetNeighborNodesUsingDirectionList(node, CardinalAndDiagonalDirections, walkableOnly);
+					return GetNeighborNodesUsingDirectionList(node, RectUtility.CardinalAndDiagonalDirections, walkableOnly);
+				case GridConnectionType.Hexagonal:
+					return GetNeighborNodesUsingDirectionList(node, HexUtility.CubeHexDirections, walkableOnly);
 				case GridConnectionType.FlatCardinal:
 				default:
-					return GetNeighborNodesUsingDirectionList(node, CardinalDirections, walkableOnly);
+					return GetNeighborNodesUsingDirectionList(node, RectUtility.CardinalDirections, walkableOnly);
 			}
 		}
 
 		private NavNode[] GetNeighborNodesUsingDirectionList(NavNode node, Vector3Int[] directions, bool walkableOnly = true)
 		{
-			NavNode[] nodeCache = new NavNode[12];
+			// NavNode[] nodeCache = new NavNode[12];
 			int n = 0;
 			foreach (var dir in directions)
 			{
-				if (_navMap.TryGetValue(node.location + dir, out var neighbor))
+				if (_navMap.TryGetValue(node.NavPosition + dir, out var neighbor))
 				{
 					if (!walkableOnly || node.Walkable)
 					{
-						nodeCache[n] = neighbor;
+						_getNeighborCache[n] = neighbor;
 						n++;
 					}
 				}
@@ -120,55 +155,66 @@ namespace NavigationTiles
 			}
 
 			var output = new NavNode[n];
-			Array.Copy(nodeCache, output, n);
+			Array.Copy(_getNeighborCache, output, n);
 			return output;
 		}
-
 		private void OnValidate()
 		{
 			_tilemap = GetComponent<Tilemap>();
-			if (Grid.cellLayout == GridLayout.CellLayout.Hexagon && _connectionType != GridConnectionType.FlatHexagonal)
+			if (Grid.cellLayout == GridLayout.CellLayout.Hexagon && _connectionType != GridConnectionType.Hexagonal)
 			{
 				Debug.LogWarning("Hexagonal connection type is only valid option for grid.");
-				_connectionType = GridConnectionType.FlatHexagonal;
+				_connectionType = GridConnectionType.Hexagonal;
 			}
 
-			if (Grid.cellLayout == GridLayout.CellLayout.Rectangle && _connectionType == GridConnectionType.FlatHexagonal)
+			if (Grid.cellLayout == GridLayout.CellLayout.Rectangle && _connectionType == GridConnectionType.Hexagonal)
 			{
 				Debug.LogWarning("Hexagonal connection type is not valid option for rectangular grid.");
 				_connectionType = GridConnectionType.FlatCardinalAndDiagonal;
 			}
 
-			if (Grid.cellLayout == GridLayout.CellLayout.Isometric && _connectionType == GridConnectionType.FlatHexagonal)
+			if (Grid.cellLayout == GridLayout.CellLayout.Isometric && _connectionType == GridConnectionType.Hexagonal)
 			{
 				Debug.LogWarning("Hexagonal connection type is not valid option for isometric grid.");
 				_connectionType = GridConnectionType.FlatCardinal;
 			}
 
-			if (Grid.cellLayout == GridLayout.CellLayout.IsometricZAsY && _connectionType == GridConnectionType.FlatHexagonal)
+			if (Grid.cellLayout == GridLayout.CellLayout.IsometricZAsY && _connectionType == GridConnectionType.Hexagonal)
 			{
 				Debug.LogWarning("Hexagonal connection type is not valid option for isometricZAsY grid.");
 				_connectionType = GridConnectionType.FlatCardinal;
 			}
 		}
 
-		public NavTile GetNavTile(Vector3Int cellPosition)
+
+		public NavTile GetNavTile(Vector3Int gridCellPosition)
 		{
-			return _tilemap.GetTile<NavTile>(cellPosition);
+			if (_connectionType != GridConnectionType.Hexagonal)
+			{
+				return _tilemap.GetTile<NavTile>(GridCellToNavCell(gridCellPosition));
+			}
+			else
+			{
+				return _tilemap.GetTile<NavTile>(gridCellPosition);
+			}
 		}
 
-		public bool TryGetNavNode(Vector3Int cellPosition, out NavNode node)
+		
+		public bool TryGetNavNode(Vector3Int gridCellPosition, out NavNode node)
 		{
-			return _navMap.TryGetValue(cellPosition, out node);
+			return _navMap.TryGetValue(gridCellPosition, out node);
 		}
-		public NavNode GetNavNode(Vector3Int cellPosition)
+		
+		public NavNode GetNavNode(Vector3Int gridCellPosition)
 		{
-			if (_navMap.TryGetValue(cellPosition, out var node))
+			if (_navMap.TryGetValue(GridCellToNavCell(gridCellPosition), out var node))
 			{
 				return node;
 			}
 
 			return null;
 		}
+
+
 	}
 }

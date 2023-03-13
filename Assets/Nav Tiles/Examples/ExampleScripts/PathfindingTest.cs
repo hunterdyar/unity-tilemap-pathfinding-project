@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using Nav_Tiles.Scripts.Utility;
 using NavigationTiles;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -15,15 +17,16 @@ namespace Nav_Tiles.Scripts.Example
 		private Vector3Int hover;
 		
 		private List<NavNode> tiles = new List<NavNode>();
-		
+
 		void Update()
 		{
 			var mouseHover = _navigation.Grid.WorldToCell(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+			mouseHover = new Vector3Int(mouseHover.x, mouseHover.y, 0);
 			if (Input.GetMouseButtonDown(0))
 			{
 				if (startNode != null)
 				{
-					_navigation.Tilemap.SetColor(startNode.location, startNode.NavTile.color);
+					_navigation.Tilemap.SetColor(startNode.TilemapPosition, startNode.NavTile.color);
 				}
 
 				startNode = _navigation.GetNavNode(hover);
@@ -33,16 +36,19 @@ namespace Nav_Tiles.Scripts.Example
 			if (hover != mouseHover)
 			{
 				hover = mouseHover;
-				
 				//reset color
 				if (endNode != null)
 				{
-					_navigation.Tilemap.SetColor(endNode.location, endNode.NavTile.color);
+					_navigation.Tilemap.SetColor(endNode.TilemapPosition, endNode.NavTile.color);
 				}
 				
 				//set end to current hover
 				endNode = _navigation.GetNavNode(hover);
-				
+				if (endNode != null)
+				{
+					_navigation.Tilemap.SetColor(endNode.TilemapPosition, Color.green);
+				}
+
 				//if we have start and end nodes.
 				if (startNode is { Walkable: true } && endNode is { Walkable: true })
 				{
@@ -60,11 +66,10 @@ namespace Nav_Tiles.Scripts.Example
 					//set all path colors
 					SetColors(Color.blue);
 					//set start and end
-					_navigation.Tilemap.SetColor(startNode.location, Color.magenta);
-					_navigation.Tilemap.SetColor(this.endNode.location, Color.green);
+					_navigation.Tilemap.SetColor(startNode.TilemapPosition, Color.magenta);
+					_navigation.Tilemap.SetColor(endNode.TilemapPosition, Color.green);
 				}
 			}
-			
 		}
 
 		
@@ -72,7 +77,7 @@ namespace Nav_Tiles.Scripts.Example
 		{
 			foreach (var t in tiles)
 			{
-				_navigation.Tilemap.SetColor(t.location,color);
+				_navigation.Tilemap.SetColor(t.TilemapPosition,color);
 			}
 		}
 
@@ -80,7 +85,7 @@ namespace Nav_Tiles.Scripts.Example
 		{
 			foreach (var t in tiles)
 			{
-				_navigation.Tilemap.SetColor(t.location, t.NavTile.color);
+				_navigation.Tilemap.SetColor(t.TilemapPosition, t.NavTile.color);
 			}
 		}
 	}

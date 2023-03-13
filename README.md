@@ -1,7 +1,14 @@
 # Tilemap Pathfinding
 Extending Unity's Tilemap system to support pathfinding, and other tools used in grid based games. 
 
-The goal is to allow the user to seamlessly draw/paint with the tile system that Unity has. 
+![Example](Documentation~/path1.gif)
+
+The goal is to allow the user to seamlessly draw/paint maps with Unity's built-in tilemap system, and have it _just work_ with pathfinding. 
+
+## Features
+- A* Algorithm
+- Tiles with different costs
+- All types of tilemap layouts (rectangular grid, isometic grid, hexagonal grid)
 
 ## Pros and Cons
 - Pro: No object-initialization per tile. Many solutions read the tilemap and spawn some kind of 'node' object for each one. The advantage is easily doing hover effects, but the disadvantage is that our map basically exists twice.
@@ -10,6 +17,7 @@ The goal is to allow the user to seamlessly draw/paint with the tile system that
 - Con: If you are using ScriptableTiles, which NavTile basically is, like the Road example un unity's manual, that will need to extend NavTile instead of Tile. Everything else should still work, NavTile just adds data, it doesn't override RefreshTile or such.
  
 ## Not Supported (Yet)
+- Hex and iso grids not yet tested.
 - Obstacles & Agents. NavTiles that know that objects are on top of them, blocking the way or adding cost for pathfinding.
 - Encapsulate pathfinding in coroutine for single-thread non-blocking (er... less blocking?) searches.
 - Example movement and usage scripts

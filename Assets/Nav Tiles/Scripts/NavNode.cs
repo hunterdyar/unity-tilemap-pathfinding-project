@@ -13,11 +13,15 @@ namespace NavigationTiles
 		public int WalkCost => tile.WalkCost;
 		public bool Walkable => tile.Walkable;
 		//todo: private setter
-		public Vector3Int location;
-		public NavNode(NavTile tile,Vector3Int location,TilemapNavigation navigation)
+		/// <summary>
+		/// TilemapPosition is the cell position in the Grid component. NavPosition is different for hex grids, and internal.
+		/// </summary>
+		public Vector3Int NavPosition;
+		public Vector3Int TilemapPosition => navigation.NavCellToGridCell(NavPosition);
+		public NavNode(NavTile tile,Vector3Int navPosition,TilemapNavigation navigation)
 		{
-			this.location = location;
 			this.tile = tile;
+			this.NavPosition = navPosition;
 			this.navigation = navigation;
 		}
 	}

@@ -4,7 +4,7 @@
 	{
 		FlatCardinal,//works on rectangular and isometric
 		FlatCardinalAndDiagonal,
-		FlatHexagonal
+		Hexagonal
 		//todo: Going up and down isometric maps (from above: flat, but there is cost to changing height	
 	}
 }
