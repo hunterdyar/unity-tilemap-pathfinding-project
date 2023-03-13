@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-using Nav_Tiles.Scripts;
-using Nav_Tiles.Scripts.Utility;
 using Priority_Queue;
 using UnityEngine;
 using UnityEngine.Tilemaps;

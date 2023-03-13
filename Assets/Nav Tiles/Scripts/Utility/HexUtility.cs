@@ -1,7 +1,6 @@
-﻿using NavigationTiles;
-using UnityEngine;
+﻿using UnityEngine;
 
-namespace Nav_Tiles.Scripts.Utility
+namespace NavigationTiles.Utility
 {
 	//todo: i've done this before, copy over: https://raw.githubusercontent.com/hunterdyar/HopLiteClone/master/Assets/Scripts/Hex/HexUtil.cs
 	public static class HexUtility

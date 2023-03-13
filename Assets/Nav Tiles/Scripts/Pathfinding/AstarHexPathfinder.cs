@@ -1,4 +1,4 @@
-﻿using Nav_Tiles.Scripts.Utility;
+﻿using NavigationTiles.Utility;
 using UnityEngine;
 
 namespace NavigationTiles.Pathfinding

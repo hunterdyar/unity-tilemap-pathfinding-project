@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Nav_Tiles.Scripts;
-using Nav_Tiles.Scripts.Utility;
 using NavigationTiles.Pathfinding;
 using NavigationTiles.Utility;
 using UnityEngine;
