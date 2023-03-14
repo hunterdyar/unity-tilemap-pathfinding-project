@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Nav_Tiles.Scripts;
 using NavigationTiles.Pathfinding;
 using NavigationTiles.Utility;
 using UnityEngine;
@@ -18,8 +17,6 @@ using UnityEngine.Tilemaps;
 
 namespace NavigationTiles
 {
-
-
 	[RequireComponent(typeof(Tilemap))]
 	public class TilemapNavigation : MonoBehaviour
 	{

@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-namespace Priority_Queue
+namespace NavigationTiles.PriorityQueue
 {
     /// <summary>
     /// A copy of StablePriorityQueue which also has generic priority-type

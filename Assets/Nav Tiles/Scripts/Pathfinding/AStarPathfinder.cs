@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Priority_Queue;
+using NavigationTiles.PriorityQueue;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 

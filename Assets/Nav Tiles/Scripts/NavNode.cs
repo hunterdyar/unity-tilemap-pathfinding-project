@@ -1,5 +1,4 @@
-﻿using Priority_Queue;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace NavigationTiles
 {

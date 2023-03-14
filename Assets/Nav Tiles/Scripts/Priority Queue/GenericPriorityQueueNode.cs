@@ -1,4 +1,4 @@
-﻿namespace Priority_Queue
+﻿namespace NavigationTiles.PriorityQueue
 {
     public class GenericPriorityQueueNode<TPriority>
     {

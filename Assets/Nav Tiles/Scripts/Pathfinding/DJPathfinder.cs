@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using Priority_Queue;
+using NavigationTiles.PriorityQueue;
 using UnityEngine;
 
 namespace NavigationTiles.Pathfinding

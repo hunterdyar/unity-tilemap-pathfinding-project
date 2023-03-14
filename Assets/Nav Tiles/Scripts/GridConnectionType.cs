@@ -1,4 +1,4 @@
-﻿namespace Nav_Tiles.Scripts
+﻿namespace NavigationTiles
 {
 	public enum GridConnectionType
 	{
