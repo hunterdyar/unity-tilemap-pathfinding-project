@@ -18,14 +18,13 @@ using UnityEngine.Tilemaps;
 namespace NavigationTiles
 {
 	[RequireComponent(typeof(Tilemap))]
-	public class TilemapNavigation : MonoBehaviour
+	public class TilemapNavigation : MonoBehaviour, IGraph
 	{
 		private NavNode[] _getNeighborCache = new NavNode[8]; //"8" here needs to be the highest possible number of neighbors.
-		
-
 		public GridConnectionType ConnectionConnectionType => _connectionType = GridConnectionType.FlatCardinal; //default
-
-		[FormerlySerializedAs("_type")] [SerializeField]
+		
+		//todo: Editor script to set this to hexagon and readonly when appropriate
+		[SerializeField]
 		private GridConnectionType _connectionType;
 
 		public Tilemap Tilemap => _tilemap;
@@ -44,7 +43,7 @@ namespace NavigationTiles
 			InitiateNavMap();
 			
 			//We can select different pathfinders.
-			if (_connectionType == GridConnectionType.Hexagonal)
+			if (Grid.cellLayout == GridLayout.CellLayout.Hexagon)
 			{
 				_pathfinder = new AstarHexPathfinder(this);
 			}

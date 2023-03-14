@@ -9,11 +9,12 @@ namespace NavigationTiles.Pathfinding
 	{
 		public Dictionary<NavNode, NavNode> CameFrom => cameFrom;
 		private Queue<NavNode> frontier = new Queue<NavNode>();
-		public BreadthFirstPathfinding(TilemapNavigation tilemapNavigation) : base(tilemapNavigation)
+		public BreadthFirstPathfinding(IGraph graph) : base(graph)
 		{
 		}
-		public override List<NavNode> FindPath(NavNode start, NavNode end)
+		public override bool TryFindPath(NavNode start, NavNode end, out List<NavNode> path)
 		{
+			_pathStatus = PathStatus.Searching;
 			cameFrom.Clear();
 			frontier.Clear();
 			
@@ -26,6 +27,7 @@ namespace NavigationTiles.Pathfinding
 			{
 				var current = frontier.Dequeue();
 
+				//NO early exit. If you wanted a faster one, use DJ or a*. I don't know why you are using breadth-first, I can only imagine you want to take advantage of the cameFrom dictionary as a vector field for something.
 				foreach (var next in tilemap.GetNeighborNodes(current))
 				{
 					if (!reached.Contains(next))
@@ -36,8 +38,18 @@ namespace NavigationTiles.Pathfinding
 					}
 				}
 			}
+			
+			if (reached.Contains(end))
+			{
+				_pathStatus = PathStatus.PathFound;
+			}
+			else
+			{
+				_pathStatus = PathStatus.NoPathFound;
+			}
 
-			return GetPath(end);
+			path = GetPath(end);
+			return _pathStatus == PathStatus.PathFound;
 		}
 		
 	}

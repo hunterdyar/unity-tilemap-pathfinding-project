@@ -8,11 +8,12 @@ using UnityEditor;
 #endif
 
     [CreateAssetMenu]
-	public class NavTile : Tile
+	public class NavTile : Tile, INavTile
     {
         public int WalkCost => walkCost;
         [SerializeField] private int walkCost = 0;
-        public bool Walkable = true;
+        public bool Walkable => walkable;
+        [SerializeField] private bool walkable = true;
         
     
     #if UNITY_EDITOR

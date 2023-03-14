@@ -60,7 +60,7 @@ namespace Nav_Tiles.Scripts.Example
 					ResetColors();
 					
 					//the actual pathfinding. the rest of this script is just faffing about with colors.
-					tiles = _navigation.Pathfinder.FindPath(startNode, endNode);
+					_navigation.Pathfinder.TryFindPath(startNode, endNode,out tiles);
 					
 					//set all path colors
 					SetColors(Color.blue);

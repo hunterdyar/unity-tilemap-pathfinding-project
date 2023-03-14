@@ -12,12 +12,13 @@ namespace NavigationTiles.Pathfinding
 	{
 		private readonly Dictionary<NavNode, int> costSoFar = new Dictionary<NavNode, int>();
 		private readonly SimplePriorityQueue<NavNode> frontier = new SimplePriorityQueue<NavNode>();
-		public AStarPathfinder(TilemapNavigation tilemapNavigation) : base(tilemapNavigation)
+		public AStarPathfinder(IGraph graph) : base(graph)
 		{
 		}
 
-		public override List<NavNode> FindPath(NavNode start, NavNode end)
+		public override bool TryFindPath(NavNode start, NavNode end, out List<NavNode> path)
 		{
+			_pathStatus = PathStatus.Searching;
 			costSoFar.Clear();
 			costSoFar[start] = 0;
 			cameFrom.Clear();
@@ -32,6 +33,7 @@ namespace NavigationTiles.Pathfinding
 
 				if (current == end)
 				{
+					_pathStatus = PathStatus.PathFound;
 					break;
 				}
 
@@ -54,8 +56,15 @@ namespace NavigationTiles.Pathfinding
 					}
 				}
 			}
+			
+			//We made it this far and never found the end tile, we have failed.
+			if (_pathStatus == PathStatus.Searching)
+			{
+				_pathStatus = PathStatus.NoPathFound;
+			}
 
-			return GetPath(end);
+			path = GetPath(end);
+			return _pathStatus == PathStatus.PathFound;
 		}
 
 		

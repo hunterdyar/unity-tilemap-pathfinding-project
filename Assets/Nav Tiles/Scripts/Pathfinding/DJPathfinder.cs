@@ -10,12 +10,13 @@ namespace NavigationTiles.Pathfinding
 	{
 		private Dictionary<NavNode,int> _costSoFar;
 
-		public DJPathfinder(TilemapNavigation navigation) : base(navigation)
+		public DJPathfinder(IGraph graph) : base(graph)
 		{
 		}
 
-		public override List<NavNode> FindPath(NavNode start, NavNode end)
+		public override bool TryFindPath(NavNode start, NavNode end, out List<NavNode> path)
 		{
+			_pathStatus = PathStatus.Searching;
 			_costSoFar = new Dictionary<NavNode, int>();
 			_costSoFar[start] = 0;
 			cameFrom.Clear();
@@ -34,6 +35,7 @@ namespace NavigationTiles.Pathfinding
 				
 				if (current == end)
 				{
+					_pathStatus = PathStatus.PathFound;
 					break;
 				}
 
@@ -52,7 +54,12 @@ namespace NavigationTiles.Pathfinding
 				}
 			}
 
-			return GetPath(end);
+			if (_pathStatus == PathStatus.Searching)
+			{
+				_pathStatus = PathStatus.NoPathFound;
+			}
+			path = GetPath(end);
+			return _pathStatus == PathStatus.PathFound;
 		}
 	}
 }
