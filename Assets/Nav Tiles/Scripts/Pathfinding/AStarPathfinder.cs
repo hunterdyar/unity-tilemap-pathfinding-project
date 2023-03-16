@@ -8,15 +8,15 @@ namespace NavigationTiles.Pathfinding
 	/// <summary>
 	/// A* pathfinding using (by default) a manhattan distance Heuristic that works on any square (or square-ish) map.
 	/// </summary>
-	public class AStarPathfinder : Pathfinder
+	public class AStarPathfinder<T> : Pathfinder<T> where T : INode
 	{
-		private readonly Dictionary<NavNode, int> costSoFar = new Dictionary<NavNode, int>();
-		private readonly SimplePriorityQueue<NavNode> frontier = new SimplePriorityQueue<NavNode>();
+		private readonly Dictionary<T, int> costSoFar = new Dictionary<T, int>();
+		private readonly SimplePriorityQueue<T> frontier = new SimplePriorityQueue<T>();
 		public AStarPathfinder(IGraph graph) : base(graph)
 		{
 		}
 
-		public override bool TryFindPath(NavNode start, NavNode end, out List<NavNode> path)
+		public override bool TryFindPath(T start, T end, out List<T> path)
 		{
 			_pathStatus = PathStatus.Searching;
 			costSoFar.Clear();
@@ -31,13 +31,13 @@ namespace NavigationTiles.Pathfinding
 			{
 				var current = frontier.Dequeue();
 
-				if (current == end)
+				if (Equals(current, end))
 				{
 					_pathStatus = PathStatus.PathFound;
 					break;
 				}
 
-				foreach (var next in tilemap.GetNeighborNodes(current))
+				foreach (T next in tilemap.GetNeighborNodes(current))
 				{
 					int newCost = costSoFar[current] + next.WalkCost; //cost algorithm generalized somewhere
 
@@ -70,7 +70,7 @@ namespace NavigationTiles.Pathfinding
 		
 
 		//overload for convenience
-		public virtual int Heuristic(NavNode a, NavNode b, int stepUpLayerCost = 1)
+		public virtual int Heuristic(INode a, INode b, int stepUpLayerCost = 1)
 		{
 			return Heuristic(a.NavPosition, b.NavPosition,stepUpLayerCost);
 		}

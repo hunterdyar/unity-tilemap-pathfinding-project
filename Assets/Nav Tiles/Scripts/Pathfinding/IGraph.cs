@@ -2,6 +2,6 @@
 {
 	public interface IGraph
 	{
-		public NavNode[] GetNeighborNodes(NavNode center, bool walkableOnly = true);
+		public INode[] GetNeighborNodes(INode center, bool walkableOnly = true);
 	}
 }

@@ -29,8 +29,8 @@ namespace NavigationTiles
 
 		public Tilemap Tilemap => _tilemap;
 		private Tilemap _tilemap;
-		public Pathfinder Pathfinder => _pathfinder;
-		private Pathfinder _pathfinder;
+		public Pathfinder<NavNode> Pathfinder => _pathfinder;
+		private Pathfinder<NavNode> _pathfinder;
 		public Grid Grid => _tilemap.layoutGrid;
 		public int MaxNodeCount => _navMap.Count + 1; //used by the pathfinder.
 
@@ -45,11 +45,11 @@ namespace NavigationTiles
 			//We can select different pathfinders.
 			if (Grid.cellLayout == GridLayout.CellLayout.Hexagon)
 			{
-				_pathfinder = new AstarHexPathfinder(this);
+				_pathfinder = new AstarHexPathfinder<NavNode>(this);
 			}
 			else
 			{
-				_pathfinder = new AStarPathfinder(this);
+				_pathfinder = new AStarPathfinder<NavNode>(this);
 			}
 		}
 
@@ -114,7 +114,7 @@ namespace NavigationTiles
 
 			return location;
 		}
-		public NavNode[] GetNeighborNodes(NavNode node, bool walkableOnly = true)
+		public INode[] GetNeighborNodes(INode node, bool walkableOnly = true)
 		{
 			switch (_connectionType)
 			{
@@ -128,7 +128,7 @@ namespace NavigationTiles
 			}
 		}
 
-		private NavNode[] GetNeighborNodesUsingDirectionList(NavNode node, Vector3Int[] directions, bool walkableOnly = true)
+		private INode[] GetNeighborNodesUsingDirectionList(INode node, Vector3Int[] directions, bool walkableOnly = true)
 		{
 			// NavNode[] nodeCache = new NavNode[12];
 			int n = 0;

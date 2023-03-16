@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using NavigationTiles;
+using NavigationTiles.Pathfinding;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -76,7 +77,7 @@ namespace Nav_Tiles.Scripts.Example
 		{
 			foreach (var t in tiles)
 			{
-				_navigation.Tilemap.SetColor(t.TilemapPosition,color);
+				_navigation.Tilemap.SetColor(((NavNode)t).TilemapPosition,color);
 			}
 		}
 
@@ -84,7 +85,8 @@ namespace Nav_Tiles.Scripts.Example
 		{
 			foreach (var t in tiles)
 			{
-				_navigation.Tilemap.SetColor(t.TilemapPosition, t.NavTile.color);
+				var nt = (NavNode)t;
+				_navigation.Tilemap.SetColor(nt.TilemapPosition, nt.NavTile.color);
 			}
 		}
 	}

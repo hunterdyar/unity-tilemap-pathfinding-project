@@ -4,10 +4,9 @@ using UnityEngine.Assertions;
 
 namespace NavigationTiles.Pathfinding
 {
-	public abstract class Pathfinder
+	public abstract class Pathfinder<T> where T : INode
 	{
-		protected readonly Dictionary<NavNode, NavNode> cameFrom = new Dictionary<NavNode, NavNode>();
-		
+		protected readonly Dictionary<T, T> cameFrom = new Dictionary<T, T>();
 		
 		protected IGraph tilemap;
 		public PathStatus PathStatus => _pathStatus;
@@ -15,8 +14,8 @@ namespace NavigationTiles.Pathfinding
 		/// <summary>
 		/// A copy of the most recently calculated path.
 		/// </summary>
-		public List<NavNode> LatestPath => _latestPath;
-		private List<NavNode> _latestPath;
+		public List<T> LatestPath => _latestPath;
+		private List<T> _latestPath;
 		
 		/// <summary>
 		/// Construct a new pathfinder
@@ -27,7 +26,7 @@ namespace NavigationTiles.Pathfinding
 			tilemap = graph;
 		}
 
-		public List<NavNode> FindPath(NavNode start, NavNode end)
+		public List<T> FindPath(T start, T end)
 		{
 			if (TryFindPath(start, end, out var path))
 			{
@@ -41,19 +40,19 @@ namespace NavigationTiles.Pathfinding
 				return null;
 			}
 		}
-		public abstract bool TryFindPath(NavNode start, NavNode end, out List<NavNode> path);
+		public abstract bool TryFindPath(T start, T end, out List<T> path);
 
-		public List<NavNode> GetPath(NavNode end)
+		public List<T> GetPath(T end)
 		{
 			if (_pathStatus != PathStatus.PathFound)
 			{
-				return new List<NavNode>();
+				return new List<T>();
 			}
 			
-			var path = new List<NavNode>();
+			var path = new List<T>();
 			var current = end;
 			//we set start=start.
-			while (current != cameFrom[current])
+			while (!Equals(current, cameFrom[current]))
 			{
 				path.Add(current);
 				current = cameFrom[current];

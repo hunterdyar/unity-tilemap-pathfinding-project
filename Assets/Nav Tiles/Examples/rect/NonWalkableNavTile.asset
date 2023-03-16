@@ -35,6 +35,4 @@ MonoBehaviour:
   m_Flags: 0
   m_ColliderType: 1
   walkCost: 0
-  Walkable: 0
-  Location: {x: 3, y: 3, z: 0}
-  TilemapNavigation: {fileID: 0}
+  walkable: 0

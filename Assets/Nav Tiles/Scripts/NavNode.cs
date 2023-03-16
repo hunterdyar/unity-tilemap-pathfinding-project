@@ -1,27 +1,29 @@
-﻿using UnityEngine;
+﻿using NavigationTiles.Pathfinding;
+using UnityEngine;
 
 namespace NavigationTiles
 {
-	public class NavNode
+	public class NavNode : INode
 	{
-		public NavTile NavTile => tile;
-		private NavTile tile;
-		public TilemapNavigation TilemapNavigation => navigation;
-		private TilemapNavigation navigation;
+		public NavTile NavTile => _tile;
+		private NavTile _tile;
+		public TilemapNavigation TilemapNavigation => _navigation;
+		private TilemapNavigation _navigation;
 
-		public int WalkCost => tile.WalkCost;
-		public bool Walkable => tile.Walkable;
+		public int WalkCost => _tile.WalkCost;
+		public bool Walkable => _tile.Walkable;
 		//todo: private setter
 		/// <summary>
 		/// TilemapPosition is the cell position in the Grid component. NavPosition is different for hex grids, and internal.
 		/// </summary>
-		public Vector3Int NavPosition;
-		public Vector3Int TilemapPosition => navigation.NavCellToGridCell(NavPosition);
+		public Vector3Int NavPosition => _navPosition;
+		private Vector3Int _navPosition;
+		public Vector3Int TilemapPosition => _navigation.NavCellToGridCell(NavPosition);
 		public NavNode(NavTile tile,Vector3Int navPosition,TilemapNavigation navigation)
 		{
-			this.tile = tile;
-			this.NavPosition = navPosition;
-			this.navigation = navigation;
+			this._tile = tile;
+			_navPosition = navPosition;
+			this._navigation = navigation;
 		}
 	}
 }

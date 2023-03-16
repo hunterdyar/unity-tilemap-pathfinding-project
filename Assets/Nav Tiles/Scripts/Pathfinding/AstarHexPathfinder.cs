@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace NavigationTiles.Pathfinding
 {
-	public class AstarHexPathfinder : AStarPathfinder
+	public class AstarHexPathfinder<T> : AStarPathfinder<T> where T : INode
 	{
 		public AstarHexPathfinder(IGraph graph) : base(graph)
 		{
