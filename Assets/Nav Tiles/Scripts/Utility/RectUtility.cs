@@ -23,6 +23,5 @@ namespace NavigationTiles.Utility
 			new Vector3Int(-1, -1, 0),
 			new Vector3Int(1, -1, 0),
 		};
-
 	}
 }

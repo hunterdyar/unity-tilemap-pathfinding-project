@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using NavigationTiles.Utility;
 using UnityEditor;
 using UnityEngine;
 
@@ -50,12 +51,83 @@ namespace NavigationTiles.GridShapes
 #endif
 		}
 		
-		
+	
+		/// <summary>
+		/// Calculates the shape rotated around the origin axis, as if it started facing up v2(0,1). 
+		/// </summary>
+		public List<Vector2Int> GetShapeInCardinalFacingDirection(Vector2Int facing)
+		{
+			int fx = Mathf.Clamp(facing.x, -1, 1);
+			int fy = Mathf.Clamp(facing.y, -1, 1);
+			
+			if (fx == 0)
+			{
+				if (fy == 1)
+				{
+					return _shape;
+				}else if (fy == -1)
+				{
+					return _shape.ConvertAll(v => v.Rotate180());
+				}
+			}
+
+			if (fy == 0)
+			{
+				if (fx == 1)
+				{
+					return _shape.ConvertAll(v => v.RotateRight());
+				}else if (fx == -1)
+				{
+					//return rotated left.
+					return _shape.ConvertAll(v => v.RotateLeft());
+				}
+			}
+
+			Debug.LogWarning("GetShapeInFacingDir requires input facing dir to be cardinal.");
+			return _shape;
+		}
+
+		public List<Vector2Int> GetShapeFlippedVertically()
+		{
+			return _shape.ConvertAll(v => v.FlipVertically());
+		}
+
+		public List<Vector2Int> GetShapeFlippedHorizontally()
+		{
+			return _shape.ConvertAll(v => v.FlipHorizontally());
+		}
+
 		//Default shape looks up. Looking right, down, left, or up.
-		// public static List<Vector2Int> GetShapeInFacingDirection(Vector2Int facing, bool flipInsteadOfRotate)
-		// {
-		// 	//
-		// 	
-		// }
+		[ContextMenu("Rotate Right")]
+		void RR()
+		{
+			_shape = GetShapeInCardinalFacingDirection(Vector2Int.right);
+		}
+
+		[ContextMenu("Rotate Left")]
+		void RL()
+		{
+			_shape = GetShapeInCardinalFacingDirection(Vector2Int.left);
+		}
+
+		[ContextMenu("Rotate 180")]
+		void R180()
+		{
+			_shape = GetShapeInCardinalFacingDirection(Vector2Int.down);
+		}
+
+		[ContextMenu("Flip Vertically")]
+		void FV()
+		{
+			_shape = GetShapeFlippedVertically();
+		}
+
+		[ContextMenu("Flip Horizontally")]
+		void FH()
+		{
+			_shape = GetShapeFlippedHorizontally();
+		}
 	}
+	
+	
 }
