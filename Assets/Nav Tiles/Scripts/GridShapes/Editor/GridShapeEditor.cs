@@ -12,7 +12,7 @@ public class GridShapeEditor : Editor
 
 		EditorGUILayout.BeginVertical();
 		
-		var bounds = grid.GridBounds;
+		var bounds = grid.GetShapeBounds(true);
 		
 		for (int y = bounds.yMax+1; y >= bounds.yMin-1; y--)
 		{

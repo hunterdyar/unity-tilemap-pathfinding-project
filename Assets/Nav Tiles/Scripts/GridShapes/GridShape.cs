@@ -10,15 +10,31 @@ namespace NavigationTiles.GridShapes
 	{
 		public List<Vector2Int> Shape => _shape;
 		[SerializeField] private List<Vector2Int> _shape;
-		public BoundsInt GridBounds => GetShapeBounds();
 
-		private BoundsInt GetShapeBounds()
+		/// <summary>
+		/// Calculates the bounds. While a shape may or may not contain the 'origin', the optional bool parameter can choose to include the origin, and will return a valid bounds with an empty shape.
+		/// </summary>
+		/// <returns></returns>
+		public BoundsInt GetShapeBounds(bool includeOrigin = false)
 		{
-			BoundsInt bounds = new BoundsInt();
-			int minX = 0;
-			int minY = 0;
-			int maxX = 0;
-			int maxY = 0;
+			var bounds = new BoundsInt();
+			//starting at 0 basically means that the origin is included in bounds calculation. This is important for the editor tool when the list is empty.
+			var minX = 0;
+			var minY = 0;
+			var maxX = 0;
+			var maxY = 0;
+
+			if (!includeOrigin && _shape.Count > 0)
+			{
+				minX = _shape[0].x;
+				maxX = _shape[0].x;
+				minY = _shape[0].y;
+				maxY = _shape[0].y;
+			}else if (!includeOrigin)//_shape is empty.
+			{
+				Debug.LogWarning("Can't get shape bounds. No items in shape and origin not included.",this);
+			}
+			
 			foreach (var pos in _shape)
 			{
 				minX = Mathf.Min(minX, pos.x);
@@ -35,7 +51,7 @@ namespace NavigationTiles.GridShapes
 		{
 
 #if UNITY_EDITOR
-				Undo.RecordObject(this, "Toggle Cell");
+				Undo.RecordObject(this, "Toggle Shape Cell");
 #endif
 				// reassemble
 				if (_shape.Contains(pos))
@@ -53,10 +69,11 @@ namespace NavigationTiles.GridShapes
 		
 	
 		/// <summary>
-		/// Calculates the shape rotated around the origin axis, as if it started facing up v2(0,1). 
+		/// Calculates and returns the shape rotated around the origin, as if it started facing up v2(0,1). Does not modify original shape.
 		/// </summary>
 		public List<Vector2Int> GetShapeInCardinalFacingDirection(Vector2Int facing)
 		{
+			// "normalize"
 			int fx = Mathf.Clamp(facing.x, -1, 1);
 			int fy = Mathf.Clamp(facing.y, -1, 1);
 			
@@ -97,6 +114,13 @@ namespace NavigationTiles.GridShapes
 			return _shape.ConvertAll(v => v.FlipHorizontally());
 		}
 
+		//While these functions could be public, I consider it bad practice for there to be too many functions that modify a shape that might be used at runtime.
+		//Basically, using this during runtime will have it's changes saved in the scriptableObject, and that's probably not what we want.
+		//so, above for runtime - returns a copy, below just for editor usefulness.
+		 
+		#region Editor Utility Functions
+#if UNITY_EDITOR
+
 		//Default shape looks up. Looking right, down, left, or up.
 		[ContextMenu("Rotate Right")]
 		void RR()
@@ -127,6 +151,8 @@ namespace NavigationTiles.GridShapes
 		{
 			_shape = GetShapeFlippedHorizontally();
 		}
+#endif
+#endregion
 	}
 	
 	
