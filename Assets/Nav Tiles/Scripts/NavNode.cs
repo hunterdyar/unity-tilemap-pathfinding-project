@@ -1,4 +1,6 @@
-﻿using NavigationTiles.Pathfinding;
+﻿using System.Collections.Generic;
+using NavigationTiles.Agents;
+using NavigationTiles.Pathfinding;
 using UnityEngine;
 
 namespace NavigationTiles
@@ -9,7 +11,7 @@ namespace NavigationTiles
 		private NavTile _tile;
 		public TilemapNavigation TilemapNavigation => _navigation;
 		private TilemapNavigation _navigation;
-
+		
 		public int WalkCost => _tile.WalkCost;
 		public bool Walkable => _tile.Walkable;
 		//todo: private setter
