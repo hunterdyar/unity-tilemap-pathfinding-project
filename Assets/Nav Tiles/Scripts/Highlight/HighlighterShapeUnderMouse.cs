@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using NavigationTiles.Agents;
+using NavigationTiles.Entities;
 using NavigationTiles.GridShapes;
 using UnityEngine;
 

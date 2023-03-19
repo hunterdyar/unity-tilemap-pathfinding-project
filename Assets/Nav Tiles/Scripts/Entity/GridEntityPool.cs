@@ -3,7 +3,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Pool;
 
-namespace NavigationTiles.Agents
+namespace NavigationTiles.Entities
 {
 	/// <summary>
 	/// Grid Entity Pool should be the primary way to get and return GridEntities that are repeated, like effects, highlighting tiles, and so on.

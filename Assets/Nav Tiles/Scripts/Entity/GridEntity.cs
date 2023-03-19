@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.Pool;
 
-namespace NavigationTiles.Agents
+namespace NavigationTiles.Entities
 {
 	/// <summary>
 	/// Entities are the most basic thing that can exist on tiles (navnodes).
