@@ -14,6 +14,11 @@ Currently focused on 2D grids, although I plan to add support for 2D-with-elatio
 - Different costs per tile/node, update walkability at runtime.
 - Supports all types of tilemap layouts (rectangular grid, isometic grid, hexagonal grid)
 
+### Shapes
+![Shapes Inspector Editor](Documentation~/attackPattern.gif)
+- Custom editor script for editing shapes on a grid
+- Combine multiple shapes together, or subtract for more complex patterns.
+
 
 ## Pros and Cons
 - Pro: No object-initialization per tile. Many solutions read the tilemap and spawn some kind of 'node' object for each one. The advantage is easily doing hover effects, but the disadvantage is that our map basically exists twice.
@@ -29,7 +34,7 @@ Currently focused on 2D grids, although I plan to add support for 2D-with-elatio
 - Encapsulate pathfinding in coroutine for single-thread non-blocking (er... less blocking?) searches.
 - Example movement and usage scripts
 - Off-grid links between separate tilemaps.
-- Shapes editor
+
 Playground for testing adding pathfinding to unity tilemaps. This is a 2DURP project, and when done, I will probably move it to a proper "package" project.
 
 
