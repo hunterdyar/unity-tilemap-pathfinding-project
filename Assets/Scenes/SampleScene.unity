@@ -1393,6 +1393,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _connectionType: 0
+  _entityMaps:
+  - {fileID: 11400000, guid: f64e28a8e732bbd419900073dca5372d, type: 2}
 --- !u!1 &1650148543
 GameObject:
   m_ObjectHideFlags: 0
@@ -1484,6 +1486,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _entityPrefab: {fileID: 2083120788156321440, guid: 731b604c8d7150e42b0a96b7a1740c94, type: 3}
+  _entityMap: {fileID: 11400000, guid: f64e28a8e732bbd419900073dca5372d, type: 2}
   maxPoolSize: 10
   _entityParent: {fileID: 1881036824}
 --- !u!114 &1881036827

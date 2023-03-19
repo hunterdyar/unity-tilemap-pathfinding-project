@@ -48,7 +48,6 @@ namespace NavigationTiles.Highlight
 					_highlightCenter = hoverNode;
 					HighlightNode(hoverNode);
 				}
-
 				return;
 			}
 			else

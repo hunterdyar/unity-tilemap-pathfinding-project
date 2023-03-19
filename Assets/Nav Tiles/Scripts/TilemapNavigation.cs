@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using NavigationTiles.Entities;
 using NavigationTiles.Pathfinding;
 using NavigationTiles.Utility;
 using UnityEngine;
@@ -33,15 +34,16 @@ namespace NavigationTiles
 		private Pathfinder<NavNode> _pathfinder;
 		public Grid Grid => _tilemap.layoutGrid;
 		public int MaxNodeCount => _navMap.Count + 1; //used by the pathfinder.
-
+		
 		//Dictionaries cannot be serialized by Unity. 
 		private readonly Dictionary<Vector3Int, NavNode> _navMap = new Dictionary<Vector3Int, NavNode>();
-
+		[Tooltip("Should reference all entity maps that will be used, will initiate them, and allow tilemap to be access point for all entities on node")]
+		[SerializeField] private EntityMap[] _entityMaps;
 		private void Awake()
 		{
 			_tilemap = GetComponent<Tilemap>();
 			InitiateNavMap();
-			
+			InitiateEntityMaps();
 			//We can select different pathfinders.
 			if (Grid.cellLayout == GridLayout.CellLayout.Hexagon)
 			{
@@ -53,6 +55,13 @@ namespace NavigationTiles
 			}
 		}
 
+		private void InitiateEntityMaps()
+		{
+			foreach (var map in _entityMaps)
+			{
+				map.Initiate(this);
+			}
+		}
 		private void InitiateNavMap()
 		{
 			//we don't know if bounds have been reasonably set or not.
@@ -181,6 +190,20 @@ namespace NavigationTiles
 			}
 		}
 
+		public List<GridEntity> GetAllEntitiesOnNode(NavNode node)
+		{
+			var entities = new List<GridEntity>();
+			
+			foreach (var map in _entityMaps)
+			{
+				if (map.TryGetEntity(node, out var entity))
+				{
+					entities.Add(entity);
+				}
+			}
+			
+			return entities;
+		}
 
 		public NavTile GetNavTile(Vector3Int gridCellPosition)
 		{
