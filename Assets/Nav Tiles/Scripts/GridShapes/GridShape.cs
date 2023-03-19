@@ -5,10 +5,10 @@ using UnityEngine;
 
 namespace NavigationTiles.GridShapes
 {
-	[CreateAssetMenu(fileName = "Grid Shape", menuName = "Nav Tiles/Grid Shape", order = 0)]
-	public class GridShape : ScriptableObject
+	[CreateAssetMenu(fileName = "Grid Shape", menuName = "Nav Tiles/Shapes/Shape", order = 0)]
+	public class GridShape : ScriptableShape
 	{
-		public List<Vector2Int> Shape => _shape;
+		public override List<Vector2Int> Shape => _shape;
 		[SerializeField] private List<Vector2Int> _shape;
 
 		/// <summary>
