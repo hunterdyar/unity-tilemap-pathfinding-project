@@ -211,5 +211,9 @@ namespace NavigationTiles
 		}
 
 
+		public bool HasNavCellLocation(Vector3Int navPosition)
+		{
+			return _navMap.ContainsKey(navPosition);
+		}
 	}
 }
