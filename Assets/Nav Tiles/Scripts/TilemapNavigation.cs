@@ -194,12 +194,18 @@ namespace NavigationTiles
 			}
 		}
 
-		
+
+		public bool TryGetNavNodeAtWorldPos(Vector3Int worldPos, out NavNode node)
+		{
+			var pos = GridCellToNavCell(Grid.WorldToCell(worldPos));
+			return TryGetNavNode(pos, out node);
+		}
+
 		public bool TryGetNavNode(Vector3Int gridCellPosition, out NavNode node)
 		{
 			return _navMap.TryGetValue(gridCellPosition, out node);
 		}
-		
+
 		public NavNode GetNavNode(Vector3Int gridCellPosition)
 		{
 			if (_navMap.TryGetValue(GridCellToNavCell(gridCellPosition), out var node))

@@ -18,5 +18,19 @@ namespace NavigationTiles.GridShapes
 		{
 			return Shape.ConvertAll<Vector3Int>(x => (Vector3Int)x + center).Where(navigation.HasNavCellLocation).ToList();
 		}
+
+		public virtual List<NavNode> GetNodesOnTilemap(NavNode center, TilemapNavigation navigation)
+		{
+			List<NavNode> nodes = new List<NavNode>();
+			foreach (var offset in Shape)
+			{
+				if(navigation.TryGetNavNode(center.NavPosition+(Vector3Int)offset,out var node))
+				{
+					nodes.Add(node);	
+				}
+			}
+
+			return nodes;
+		}
 	}
 }
