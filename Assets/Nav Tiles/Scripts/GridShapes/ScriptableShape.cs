@@ -13,11 +13,10 @@ namespace NavigationTiles.GridShapes
 		/// Required when using procedural shapes, like "straight line until wall".
 		/// </summary>
 
-		//Todo: This should return List<NavNode> ?
-		public virtual List<Vector3Int> GetShapeOnTilemap(Vector3Int center,TilemapNavigation navigation)
-		{
-			return Shape.ConvertAll<Vector3Int>(x => (Vector3Int)x + center).Where(navigation.HasNavCellLocation).ToList();
-		}
+		// public virtual List<Vector3Int> GetShapeOnTilemap(Vector3Int center,TilemapNavigation navigation)
+		// {
+		// 	return Shape.ConvertAll<Vector3Int>(x => (Vector3Int)x + center).Where(navigation.HasNavCellLocation).ToList();
+		// }
 
 		public virtual List<NavNode> GetNodesOnTilemap(NavNode center, TilemapNavigation navigation)
 		{

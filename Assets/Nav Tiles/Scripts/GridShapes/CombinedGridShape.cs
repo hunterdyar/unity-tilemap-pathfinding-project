@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace NavigationTiles.GridShapes
 {
-	[CreateAssetMenu(fileName = "Combined Grid Shape", menuName = "Nav Tiles/Shape/Combined Shape", order = 0)]
+	[CreateAssetMenu(fileName = "Combined Grid Shape", menuName = "Nav Tiles/Shapes/Combined Shape", order = 0)]
 	public class CombinedGridShape : ScriptableShape
 	{
 		[Tooltip("Included shapes be a set union. Excluded spaces will take priority, and will always be excluded, regardless of order in this list. In other words, it is not a sequence of adds/subtracts, but taking a union of all the 'includes' and excluding from that any excludes.")]
@@ -21,6 +21,12 @@ namespace NavigationTiles.GridShapes
 			//Consider ways to cache this - we would have to know if our children are cacheable or not.
 			var exclude = _shapes.Where(x => x.Operation == ShapeSetOperation.Exclude).SelectMany(x => x.Shape.Shape).Distinct();
 			return _shapes.Where(x=>x.Operation == ShapeSetOperation.Include).SelectMany(x=>x.Shape.Shape).Where(x=>!exclude.Contains(x)).Distinct().ToList();
+		}
+
+		public override List<NavNode> GetNodesOnTilemap(NavNode center, TilemapNavigation navigation)
+		{
+			
+			return base.GetNodesOnTilemap(center, navigation);
 		}
 
 		private void OnValidate()

@@ -7,7 +7,7 @@ using UnityEngine.Tilemaps;
 using UnityEditor;
 #endif
 
-    [CreateAssetMenu]
+    [CreateAssetMenu(menuName = "Nav Tiles/Nav Tile")]
 	public class NavTile : Tile, INavTile
     {
         public int WalkCost => walkCost;

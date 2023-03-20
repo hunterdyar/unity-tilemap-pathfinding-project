@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
-using UnityEditor.TerrainTools;
-using UnityEditorInternal;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditorInternal;
+#endif
 
 namespace NavigationTiles.Entities
 {
@@ -16,10 +17,11 @@ namespace NavigationTiles.Entities
 		
 		//Todo: wrap data in bidirectional dictionary.
 		private readonly Dictionary<NavNode, GridEntity> _entities = new Dictionary<NavNode, GridEntity>();
-		private Dictionary<GridEntity, NavNode> _inverseEntities = new Dictionary<GridEntity, NavNode>();
+		private readonly Dictionary<GridEntity, NavNode> _inverseEntities = new Dictionary<GridEntity, NavNode>();
 		public int Count => _entities.Count;
 
-		//We don't actually need this injected! yet... I am only assuming we eventually will! I think we will for listening to map events...
+		//We don't actually need this injected! yet...
+		//I think we will for listening to events, moving between maps, or so on.
 		private TilemapNavigation _tilemap;
 
 		public void Initiate(TilemapNavigation tilemapNavigation)
