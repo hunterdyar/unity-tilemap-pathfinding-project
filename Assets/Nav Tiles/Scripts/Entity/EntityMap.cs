@@ -34,6 +34,10 @@ namespace NavigationTiles.Entities
 			return _entities.TryGetValue(node, out entity);
 		}
 
+		public bool HasAnyEntity(NavNode node)
+		{
+			return _entities.ContainsKey(node);
+		}
 		public void AddEntityToMap(NavNode node, GridEntity entity, bool snapToPosition = true)
 		{
 			if (_entities.ContainsValue(entity))
