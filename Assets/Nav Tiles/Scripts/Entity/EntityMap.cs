@@ -22,13 +22,14 @@ namespace NavigationTiles.Entities
 
 		//We don't actually need this injected! yet...
 		//I think we will for listening to events, moving between maps, or so on.
-		private TilemapNavigation _tilemap;
+		public TilemapNavigation TilemapNavNavigation => _tilemapNav;
+		private TilemapNavigation _tilemapNav;
 
 		public void Initiate(TilemapNavigation tilemapNavigation)
 		{
 			_entities.Clear();
 			_inverseEntities.Clear();
-			this._tilemap = tilemapNavigation;
+			this._tilemapNav = tilemapNavigation;
 		}
 
 		public bool TryGetEntity(NavNode node, out GridEntity entity)
@@ -94,6 +95,13 @@ namespace NavigationTiles.Entities
 #if UNITY_EDITOR
 			InternalEditorUtility.RepaintAllViews();
 #endif
+		}
+
+		public void MoveEntityToNode(GridEntity entity,NavNode node)
+		{
+			RemoveEntity(entity);
+			AddEntityToMap(node,entity);
+			
 		}
 	}
 }

@@ -218,7 +218,7 @@ namespace NavigationTiles
 		}
 
 
-		public bool TryGetNavNodeAtWorldPos(Vector3Int worldPos, out NavNode node)
+		public bool TryGetNavNodeAtWorldPos(Vector3 worldPos, out NavNode node)
 		{
 			var pos = GridCellToNavCell(Grid.WorldToCell(worldPos));
 			return TryGetNavNode(pos, out node);
